@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    /* ეს არის მთელი საიტის "ძრავა".
+      რადგან Tailwind-ის p-4, m-2, gap-5 და ა.შ. იყენებენ rem-ს,
+      ამ ხაზის შეცვლით შენ აიძულებ ყველა სტანდარტულ კლასს, 
+      რომ მობილურზე დაპატარავდნენ და დესკტოპზე გაიზარდონ.
+    */
+    font-size: clamp(13px, 0.7vw + 0.8vh, 16px);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  @keyframes progress {
+    from {
+      width: 0%;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  .animate-\[progress_2s_linear\] {
+    animation: progress 2s linear;
+  }
+  /* ნომრების ისრების გაქრობა */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* Swiper-ის ისრები */
+.swiper-button-next,
+.swiper-button-prev {
+  width: 35px !important;
+  height: 35px !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 12px;
+}

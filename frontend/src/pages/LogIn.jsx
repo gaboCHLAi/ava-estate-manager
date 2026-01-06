@@ -1,0 +1,142 @@
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import Logo from "../Components/Logo";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
+import { useStatus } from "../Components/contextAPI/Context";
+export default function LogIn() {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submiting, setSubmiting] = useState(false);
+  const [formErrors, setFormErrors] = useState({}); // OBJECT STATE
+  const [wrongPassword, setWrongPassword] = useState("");
+  const { login } = useStatus();
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePassword = (password) =>
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(
+      password
+    );
+
+  const formValidation = () => {
+    const errors = {};
+
+    if (!email) errors.email = t("email_required");
+    else if (!validateEmail(email)) errors.email = t("invalid_email");
+
+    if (!password) {
+      errors.password = t("password_required");
+    } else if (!validatePassword(password)) {
+      // მომხმარებელს ჯერ ვეუბნებით, რომ პაროლი ძალიან მოკლეა
+      errors.password = t("min_password");
+    } else if (wrongPassword) {
+      // ეს მხოლოდ მაშინ გამოჩნდება, თუ ფორმატი სწორია, მაგრამ სერვერმა უარყო
+      errors.password = t("invalid_password");
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0; // true თუ error-ები არ არის
+  };
+
+  // ვაშორებთ შეცდომებს როცა იუზერი აკრეფს
+  useEffect(() => {
+    if (formErrors.email && email) {
+      setFormErrors((prev) => ({ ...prev, email: "" }));
+    }
+  }, [email]);
+
+  useEffect(() => {
+    if (formErrors.password && password) {
+      setFormErrors((prev) => ({ ...prev, password: "" }));
+    }
+  }, [password]);
+
+  const handleLogIn = async (e) => {
+    e.preventDefault();
+    const isValid = formValidation();
+    if (!isValid) return;
+
+    setSubmiting(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
+        { email, password }
+      );
+
+      login(response.data.user.first_name);
+
+      navigate(from, { replace: true });
+    } catch (error) {
+      setWrongPassword(error.response?.data?.message || "❌ მოხდა შეცდომა");
+    } finally {
+      setSubmiting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex justify-center items-center px-4 bg-blue-400">
+      <form
+        onSubmit={handleLogIn}
+        className="flex flex-col items-center gap-6 bg-white rounded-2xl p-8 w-full max-w-md shadow-lg"
+      >
+        <Link to="/" className="self-start w-full">
+          <FontAwesomeIcon
+            icon={faArrowLeft}
+            className="text-blue-500 w-5 h-5 hover:scale-105"
+          />
+        </Link>
+        <Logo className="w-32 text-blue-500 mb-5" />
+
+        <input
+          placeholder={t("email_placeholder")}
+          type="text"
+          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        {formErrors.email && (
+          <span className="text-red-500 font-sm self-start">
+            {formErrors.email}
+          </span>
+        )}
+
+        <input
+          placeholder={t("password_placeholder")}
+          type="password"
+          className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        {formErrors.password && (
+          <span className="text-red-500 font-sm self-start">
+            {formErrors.password}
+          </span>
+        )}
+
+        <Link
+          to="/forgotpassword"
+          className="self-end text-blue-500 text-sm hover:underline"
+        >
+          {t("forgot_password")}
+        </Link>
+
+        <button
+          disabled={submiting}
+          className="w-full py-3 text-white font-semibold text-lg rounded-2xl bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 mt-3"
+        >
+          {submiting ? t("in_progress...") : t("login")}
+        </button>
+
+        <p className="text-sm text-gray-500 mt-2">
+          {t("dont_have_account_yet")}{" "}
+          <Link to="/signup" className="text-blue-500 hover:underline">
+            {t("register")}
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
+}
