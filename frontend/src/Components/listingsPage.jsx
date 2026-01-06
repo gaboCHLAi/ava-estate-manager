@@ -38,7 +38,7 @@ export default function ListingsPage() {
       setLoading(true);
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/listings/getListings",
+          `${import.meta.env.VITE_BACKEND_URL}/listings/getListings`,
 
           {
             dealTypeId: activeDealType,

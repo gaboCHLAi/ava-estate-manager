@@ -23,7 +23,9 @@ const ManageListing = () => {
     const fetchItem = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/listings/getUserListingById/${id}`,
+          `${
+            import.meta.env.VITE_BACKEND_URL
+          }/listings/getUserListingById/${id}`,
           {
             params: { lang: i18n.language },
             headers: {
