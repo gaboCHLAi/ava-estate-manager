@@ -14,4 +14,9 @@ app.use(express.json());
 app.use("/api", lookuproutes);
 app.use("/api/listings", listingsroutes);
 app.use("/api/auth", authRoutes);
-app.listen(5000, () => console.log("Server running on port 5000"));
+// ნაცვლად app.listen(5000...
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});

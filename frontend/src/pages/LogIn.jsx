@@ -14,7 +14,7 @@ export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submiting, setSubmiting] = useState(false);
-  const [formErrors, setFormErrors] = useState({}); // OBJECT STATE
+  const [formErrors, setFormErrors] = useState({});
   const [wrongPassword, setWrongPassword] = useState("");
   const { login } = useStatus();
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -32,18 +32,15 @@ export default function LogIn() {
     if (!password) {
       errors.password = t("password_required");
     } else if (!validatePassword(password)) {
-      // მომხმარებელს ჯერ ვეუბნებით, რომ პაროლი ძალიან მოკლეა
       errors.password = t("min_password");
     } else if (wrongPassword) {
-      // ეს მხოლოდ მაშინ გამოჩნდება, თუ ფორმატი სწორია, მაგრამ სერვერმა უარყო
       errors.password = t("invalid_password");
     }
 
     setFormErrors(errors);
-    return Object.keys(errors).length === 0; // true თუ error-ები არ არის
+    return Object.keys(errors).length === 0;
   };
 
-  // ვაშორებთ შეცდომებს როცა იუზერი აკრეფს
   useEffect(() => {
     if (formErrors.email && email) {
       setFormErrors((prev) => ({ ...prev, email: "" }));

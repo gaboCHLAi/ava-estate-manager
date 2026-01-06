@@ -109,7 +109,6 @@ export default function EditList() {
           contact_name: data.contact_name,
           contact_phone: data.contact_phone,
           location: data.location,
-          // სურათები ცალკე თემაა, მაგრამ შეგვიძლია რაოდენობით შევადაროთ
           imagesLength: data.image?.length || 0,
         };
         setPropertyTypeId(data.property_type_id);
