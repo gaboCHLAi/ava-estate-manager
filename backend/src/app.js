@@ -8,7 +8,12 @@ import morgan from "morgan";
 const app = express();
 app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use("/api", lookuproutes);
