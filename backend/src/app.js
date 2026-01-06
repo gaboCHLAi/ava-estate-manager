@@ -10,7 +10,7 @@ app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
 app.use(
   cors({
-    origin: "https://ava-estate-manager.onrender.com", // შენი ფრონტენდის ლინკი
+    origin: process.env.cors,
     credentials: true,
   })
 );
