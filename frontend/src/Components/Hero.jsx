@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useStatus } from "./contextAPI/Context";
 import Tbilisi from "../assets/tbilisi.jpg";
-import ListingsPage from "./ListingsPage";
+import ListingsPage from "./listingsPage";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
