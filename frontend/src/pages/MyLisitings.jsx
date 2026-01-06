@@ -139,7 +139,9 @@ const MyListings = () => {
                         item.image.map((imgUrl, index) => (
                           <SwiperSlide key={index}>
                             <img
-                              src={`http://localhost:5000${imgUrl}`}
+                              src={`${
+                                import.meta.env.VITE_BACKEND_URL
+                              }${imgUrl}`}
                               alt={`პროდუქტის ფოტო ${index + 1}`}
                               className="w-full h-full object-cover"
                             />

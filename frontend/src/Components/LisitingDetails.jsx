@@ -20,7 +20,7 @@ const ListingDetail = () => {
     const fetchItem = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/listings/getList/${id}`,
+          `${import.meta.env.VITE_BACKEND_URL}/listings/getList/${id}`,
           { params: { lang: i18n.language } }
         );
         setItem(response.data);
@@ -72,9 +72,8 @@ const ListingDetail = () => {
                   item.image.map((imgUrl, index) => (
                     <SwiperSlide key={index}>
                       <img
-                        src={`http://localhost:5000${imgUrl}`}
+                        src={`${import.meta.env.VITE_BACKEND_IMG_URL}${imgUrl}`}
                         alt={`პროდუქტის ფოტო ${index + 1}`}
-                        object-cover
                         className="w-full h-full object-cover    "
                       />
                     </SwiperSlide>

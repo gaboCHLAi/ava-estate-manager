@@ -124,7 +124,7 @@ export default function ListingsPage() {
                     item.image.map((img, index) => (
                       <div key={index} className="h-64">
                         <img
-                          src={`http://localhost:5000${img}`}
+                          src={`${import.meta.env.VITE_BACKEND_IMG_URL}${img}`}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />

@@ -205,7 +205,9 @@ const ManageListing = () => {
             <div className="w-32 h-24 bg-gray-200 rounded-2xl overflow-hidden shadow-inner">
               {item.image && item.image[0] ? (
                 <img
-                  src={`http://localhost:5000${item.image[0]}`}
+                  src={`${import.meta.env.VITE_BACKEND_IMG_URL}${
+                    item.image[0]
+                  }`}
                   className="w-full h-full object-cover"
                   alt="Property"
                 />

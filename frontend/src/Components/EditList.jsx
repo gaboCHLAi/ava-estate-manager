@@ -721,7 +721,7 @@ export default function EditList() {
                         src={
                           img instanceof File
                             ? URL.createObjectURL(img)
-                            : `http://localhost:5000${img}`
+                            : `${import.meta.env.VITE_BACKEND_IMG_URL}${img}`
                         }
                         alt="preview"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
