@@ -8,7 +8,12 @@ import morgan from "morgan";
 const app = express();
 app.use(morgan("dev"));
 app.use("/uploads", express.static("uploads"));
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://ava-estate-manager.onrender.com", // შენი ფრონტენდის ლინკი
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use("/api", lookuproutes);
