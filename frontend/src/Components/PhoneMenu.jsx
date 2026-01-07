@@ -38,7 +38,7 @@ export default function PhoneMenu({ isOpen, onClose, user, handleLogout }) {
               {t("menu")}
             </p>
             <p className="text-xl font-extrabold text-gray-800 truncate">
-              {user || "სტუმარი"}
+              {user?.userName || "სტუმარი"}
             </p>
           </div>
           <button

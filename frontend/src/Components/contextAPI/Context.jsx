@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const StatusContext = createContext();
 
@@ -13,13 +13,13 @@ export const StatusProvider = ({ children }) => {
   const [maxPrice, setMaxPrice] = useState("");
   const [images, setImages] = useState([]);
   const [user, setUser] = useState(null);
+
   const login = ({ userName, token }) => {
-    localStorage.setItem("user", userName);
+    localStorage.setItem("userName", userName); // შენს key-ში უნდა იყოს userName
     localStorage.setItem("token", token);
     setUser({ userName, token });
   };
 
-  // Page load-ზე აღდგენა
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
@@ -27,11 +27,12 @@ export const StatusProvider = ({ children }) => {
       setUser({ userName: storedUser, token: storedToken });
     }
   }, []);
-
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
   };
+
   return (
     <StatusContext.Provider
       value={{

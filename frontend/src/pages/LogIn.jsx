@@ -65,10 +65,11 @@ export default function LogIn() {
         { email, password }
       );
 
-      const { user, token } = response.data;
-
-      // დამახსოვრება state-ში და LocalStorage-ში
-      login({ userName: user.first_name, token });
+      // აქასწორე
+      login({
+        userName: response.data.user.first_name, // Backend-ის user.first_name
+        token: response.data.token,
+      });
 
       navigate(from, { replace: true });
     } catch (error) {

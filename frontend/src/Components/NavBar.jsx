@@ -69,9 +69,11 @@ export default function NavBar({ menuRef, activeDropdown }) {
                   <>
                     <button
                       onClick={() => setIsOpen(!isOpen)}
-                      className="flex items-center gap-2  border-blue-600 bg-blue-200 text-blue-600 px-5 py-[8.8px] rounded-lg hover:bg-blue-50 transition shadow-md"
+                      className="flex items-center gap-2  border-blue-600 bg-blue-100 text-blue-600 px-5 py-[8.8px] rounded-lg hover:bg-blue-200 transition shadow-md"
                     >
-                      <span className="font-medium">{user}</span>
+                      <span className="font-medium">
+                        {user?.userName || "Guest"}
+                      </span>
                       <svg
                         className={`w-4 h-4 transition-transform ${
                           isOpen ? "rotate-180" : ""
