@@ -55,6 +55,7 @@ export default function LogIn() {
 
   const handleLogIn = async (e) => {
     e.preventDefault();
+    console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
     const isValid = formValidation();
     if (!isValid) return;
 
