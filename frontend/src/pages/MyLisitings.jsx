@@ -140,7 +140,7 @@ const MyListings = () => {
                           <SwiperSlide key={index}>
                             <img
                               src={`${
-                                import.meta.env.VITE_BACKEND_URL
+                                import.meta.env.VITE_BACKEND_IMG_URL
                               }${imgUrl}`}
                               alt={`პროდუქტის ფოტო ${index + 1}`}
                               className="w-full h-full object-cover"
