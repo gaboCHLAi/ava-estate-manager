@@ -1,3 +1,4 @@
+// src/app.js
 import express from "express";
 import cors from "cors";
 import lookuproutes from "./Routes/lookupRoutes.js";
@@ -12,28 +13,36 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
+// Logging
 app.use(morgan("dev"));
+
+// Static uploads folder
 app.use("/uploads", express.static("uploads"));
+
+// JSON + CORS
+app.use(express.json());
 app.use(
   cors({
     origin: process.env.CORS,
     credentials: true,
   })
 );
-app.use(express.json());
 
+// API routes
 app.use("/api", lookuproutes);
 app.use("/api/listings", listingsroutes);
 app.use("/api/auth", authRoutes);
 
 // Serve React build
-app.use(express.static(join(__dirname, "../../frontend/dist")));
+const reactBuildPath = join(__dirname, "../../frontend/dist");
+app.use(express.static(reactBuildPath));
 
-// Catch-all
-app.get("/*", (req, res) => {
-  res.sendFile(join(__dirname, "../../frontend/dist/index.html"));
+// Catch-all for SPA routes
+app.get("/:path*", (req, res) => {
+  res.sendFile(join(reactBuildPath, "index.html"));
 });
 
+// Start server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
