@@ -69,7 +69,7 @@ export default function NavBar({ menuRef, activeDropdown }) {
                   <>
                     <button
                       onClick={() => setIsOpen(!isOpen)}
-                      className="flex items-center gap-2  border-blue-600 bg-blue-50 text-white px-5 py-[8.8px] rounded-lg hover:bg-blue-500 transition shadow-md"
+                      className="flex items-center gap-2  border-blue-600 bg-blue-200 text-blue-600 px-5 py-[8.8px] rounded-lg hover:bg-blue-50 transition shadow-md"
                     >
                       <span className="font-medium">{user}</span>
                       <svg
