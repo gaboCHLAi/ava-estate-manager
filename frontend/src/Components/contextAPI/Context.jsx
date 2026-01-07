@@ -13,10 +13,20 @@ export const StatusProvider = ({ children }) => {
   const [maxPrice, setMaxPrice] = useState("");
   const [images, setImages] = useState([]);
   const [user, setUser] = useState(null);
-  const login = (userName) => {
+  const login = ({ userName, token }) => {
     localStorage.setItem("user", userName);
-    setUser(userName);
+    localStorage.setItem("token", token);
+    setUser({ userName, token });
   };
+
+  // Page load-ზე აღდგენა
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+    if (storedUser && storedToken) {
+      setUser({ userName: storedUser, token: storedToken });
+    }
+  }, []);
 
   const logout = () => {
     localStorage.removeItem("user");

@@ -55,7 +55,6 @@ export default function LogIn() {
 
   const handleLogIn = async (e) => {
     e.preventDefault();
-    console.log("BACKEND URL:", import.meta.env.VITE_BACKEND_URL);
     const isValid = formValidation();
     if (!isValid) return;
 
@@ -66,7 +65,10 @@ export default function LogIn() {
         { email, password }
       );
 
-      login(response.data.user.first_name);
+      const { user, token } = response.data;
+
+      // დამახსოვრება state-ში და LocalStorage-ში
+      login({ userName: user.first_name, token });
 
       navigate(from, { replace: true });
     } catch (error) {
