@@ -1,11 +1,14 @@
+// src/app.js
 import express from "express";
 import cors from "cors";
-import lookuproutes from "./Routes/lookupRoutes.js";
-import listingsroutes from "./Routes/listingsRoutes.js";
-import authRoutes from "./Routes/authRoutes.js";
 import morgan from "morgan";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+
+// Routes
+import lookuproutes from "./Routes/lookupRoutes.js";
+import listingsroutes from "./Routes/listingsRoutes.js";
+import authRoutes from "./Routes/authRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -15,11 +18,13 @@ const app = express();
 // Logging
 app.use(morgan("dev"));
 
-// Static uploads folder
+// Serve uploads
 app.use("/uploads", express.static("uploads"));
 
-// JSON + CORS
+// Body parser
 app.use(express.json());
+
+// CORS
 app.use(
   cors({
     origin: process.env.CORS,
@@ -36,7 +41,7 @@ app.use("/api/auth", authRoutes);
 const reactBuildPath = join(__dirname, "../../frontend/dist");
 app.use(express.static(reactBuildPath));
 
-// Catch-all route for SPA (React)
+// Catch-all for React SPA (Express 4 syntax!)
 app.get("*", (req, res) => {
   res.sendFile(join(reactBuildPath, "index.html"));
 });
