@@ -1,4 +1,3 @@
-// src/app.js
 import express from "express";
 import cors from "cors";
 import lookuproutes from "./Routes/lookupRoutes.js";
@@ -37,8 +36,8 @@ app.use("/api/auth", authRoutes);
 const reactBuildPath = join(__dirname, "../../frontend/dist");
 app.use(express.static(reactBuildPath));
 
-// Catch-all for SPA routes
-app.get("/:path*", (req, res) => {
+// Catch-all route for SPA (React)
+app.get("*", (req, res) => {
   res.sendFile(join(reactBuildPath, "index.html"));
 });
 
