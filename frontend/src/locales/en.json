@@ -132,5 +132,6 @@
   "passwords_dont_match": "Passwords do not match",
   "password_changed_congrats": "Congrats! Your password has been updated.",
   "code_required": "code_required",
-  "no_changes_desc": "You haven't made any changes to the listing data."
+  "no_changes_desc": "You haven't made any changes to the listing data.",
+  "invalid_number": "invalid number"
 }

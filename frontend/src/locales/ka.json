@@ -132,5 +132,6 @@
   "passwords_dont_match": "პაროლები არ ემთხვევა",
   "password_changed_congrats": "გილოცავთ! თქვენი პაროლი განახლებულია.",
   "code_required": "შეიყვანეთ კოდი",
-  "no_changes_desc": "თქვენ არაფერი შეგიცვლიათ მონაცემებში."
+  "no_changes_desc": "თქვენ არაფერი შეგიცვლიათ მონაცემებში.",
+  "invalid_number": "ნომერი არასწორია"
 }

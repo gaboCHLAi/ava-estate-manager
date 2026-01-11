@@ -51,7 +51,11 @@ export default function CreateListing() {
     if (!totalFloor) formErrors.totalFloor = t("required");
     if (!description) formErrors.description = t("required");
     if (!name) formErrors.name = t("required");
-    if (!phone) formErrors.phone = t("required");
+    if (!phone || phone.trim() === "") {
+      formErrors.phone = t("required");
+    } else if (phone.length < 9) {
+      formErrors.phone = t("invalid_number");
+    }
     if (!code) formErrors.code = t("required");
     if (!selectedCity) formErrors.city = t("required");
     if (images.length === 0) formErrors.images = t("required");
@@ -70,7 +74,7 @@ export default function CreateListing() {
       totalFloor,
       description,
       name,
-      phone,
+      phone: phone && phone.length >= 9 ? phone : "",
       code,
       city: selectedCity,
       images: images.length > 0 ? images : "",
