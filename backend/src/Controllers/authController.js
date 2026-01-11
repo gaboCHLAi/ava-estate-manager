@@ -42,14 +42,14 @@ export const LogIn = async (req, res) => {
     const result = await pool.query(q, [email]);
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ message: "მომხმარებელი ვერ მოიძებნა" });
+      return res.status(401).json({ message: "user_not_found" });
     }
 
     const user = result.rows[0];
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "არასწორი პაროლი" });
+      return res.status(401).json({ message: "invalid_password" });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
@@ -67,7 +67,7 @@ export const LogIn = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ message: "ავტორიზაცია ვერ გაიარეთ" });
+    return res.status(500).json({ message: "auth_failed" });
   }
 };
 

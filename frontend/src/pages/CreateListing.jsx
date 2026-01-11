@@ -196,7 +196,6 @@ export default function CreateListing() {
   // 1. კოდის გაგზავნის ფუნქცია
   const handleRequestCode = async () => {
     if (!phone || phone.length < 9) {
-      alert("გთხოვთ, შეიყვანოთ სწორი მობილურის ნომერი");
       return;
     }
 
@@ -322,10 +321,10 @@ export default function CreateListing() {
               <i className="fas fa-check text-4xl text-green-500"></i>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              წარმატება!
+              {t("success_title")}
             </h2>
             <p className="text-gray-600 text-center font-medium">
-              თქვენი განცხადება წარმატებით დაემატა.
+              {t("listing_add_success")}
             </p>
             <div className="mt-6 w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div className="h-full bg-green-500 animate-[progress_2s_linear]"></div>

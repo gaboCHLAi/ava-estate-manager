@@ -37,6 +37,7 @@ export default function EditList() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [isSucceed, setIsSucceed] = useState(false);
+  const [showNoChangesModal, setShowNoChangesModal] = useState(false);
   const { t, i18n } = useTranslation();
   const { images, setImages } = useStatus();
   const navigate = useNavigate();
@@ -89,6 +90,8 @@ export default function EditList() {
         setDealType(dealRes.data);
         setPropertyType(propRes.data);
         setCities(citiesRes.data);
+        console.log("es aris logi", citiesRes.data);
+
         setStatus(statRes.data);
         setCondition(condRes.data);
 
@@ -140,13 +143,16 @@ export default function EditList() {
     fetchAllData();
   }, [id, i18n.language]);
 
-  // Search
   useEffect(() => {
-    if (
-      !searchTerm ||
-      (selectedCity && selectedCity.display_name === searchTerm)
-    ) {
+    if (!searchTerm.trim()) {
       setResults([]);
+      return;
+    }
+    if (selectedCity && selectedCity.display_name === searchTerm) {
+      setResults([]);
+      return;
+    }
+    if (initialDataRef.current?.location === searchTerm) {
       return;
     }
 
@@ -170,9 +176,10 @@ export default function EditList() {
         console.error("Search error:", error);
       }
     };
+
     const debounce = setTimeout(fetchResults, 500);
     return () => clearTimeout(debounce);
-  }, [searchTerm]);
+  }, [searchTerm, selectedCity]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -186,7 +193,6 @@ export default function EditList() {
 
   const handleRequestCode = async () => {
     if (!phone || phone.length < 9) {
-      alert("შეიყვანეთ სწორი ნომერი");
       return;
     }
     setVerificationLoading(true);
@@ -198,7 +204,6 @@ export default function EditList() {
       setIsCodeSent(true);
       setCode(String(resp.data.otpCode));
     } catch (error) {
-      alert("SMS Error");
     } finally {
       setVerificationLoading(false);
     }
@@ -232,7 +237,7 @@ export default function EditList() {
       JSON.stringify(initialDataRef.current) !== JSON.stringify(currentData);
 
     if (!isChanged) {
-      alert("თქვენ არაფერი შეგიცვლიათ");
+      setShowNoChangesModal(true);
       setSubmiting(false);
       return;
     }
@@ -308,6 +313,24 @@ export default function EditList() {
   }
   return (
     <div>
+      {showNoChangesModal && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full mx-4 transform animate-in zoom-in duration-300 flex flex-col items-center">
+            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+              <i className="fas fa-info-circle text-3xl text-blue-500"></i>
+            </div>
+            <p className="text-gray-500 text-center mb-6">
+              {t("no_changes_desc") || "თქვენ არაფერი შეგიცვლიათ მონაცემებში."}
+            </p>
+            <button
+              onClick={() => setShowNoChangesModal(false)}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-lg active:scale-95"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       {isSucceed && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white p-8 rounded-3xl shadow-2xl border border-green-100 flex flex-col items-center transform animate-in zoom-in duration-300 scale-110">
@@ -315,10 +338,10 @@ export default function EditList() {
               <i className="fas fa-check text-4xl text-green-500"></i>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              წარმატება!
+              {t("success_title")}
             </h2>
             <p className="text-gray-600 text-center font-medium">
-              თქვენი განცხადება წარმატებით განახლდა.
+              {t("listing_update_success")}
             </p>
             <div className="mt-6 w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div className="h-full bg-green-500 animate-[progress_2s_linear]"></div>
@@ -328,7 +351,7 @@ export default function EditList() {
       )}
       <div className="max-w-4xl mx-auto p-8 mt-12 bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-200">
         <h1 className="text-4xl font-extrabold text-center text-blue-700 mb-10">
-          განცხადების რედაქტირება
+          {t("edit_listing")}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -505,7 +528,10 @@ export default function EditList() {
               type="text"
               placeholder={`${t("street")}, ${t("city")}, ${t("neighborhood")}`}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setSelectedCity(null);
+              }}
               className="w-full px-4 py-3 mb-4 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
             {results.length > 0 && (

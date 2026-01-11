@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useStatus } from "./contextAPI/Context";
 import { useNavigate } from "react-router-dom";
-import Slider from "react-slick"; // React Slick-ის კომპონენტი
+import Slider from "react-slick";
 import { useTranslation } from "react-i18next";
-// აქვე მივამატოთ სლაიდერის სტილები
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 export default function ListingsPage() {
   const [loading, setLoading] = useState(true);
-
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+
   const {
     activeDealType,
     activeProperty,
@@ -22,24 +22,28 @@ export default function ListingsPage() {
     minPrice,
     maxPrice,
   } = useStatus();
+
   const [debouncedMinPrice, setDebouncedMinPrice] = useState(minPrice);
   const [debouncedMaxPrice, setDebouncedMaxPrice] = useState(maxPrice);
-  const navigate = useNavigate();
+
+  // --- PAGINATION STATES ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const cardsPerPage = 8;
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedMinPrice(minPrice);
       setDebouncedMaxPrice(maxPrice);
     }, 500);
-
     return () => clearTimeout(handler);
   }, [minPrice, maxPrice]);
+
   useEffect(() => {
     const fetchListings = async () => {
       setLoading(true);
       try {
         const response = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/listings/getListings`,
-
           {
             dealTypeId: activeDealType,
             propertyId: activeProperty,
@@ -51,6 +55,7 @@ export default function ListingsPage() {
         );
         setListings(response.data);
         setLoading(false);
+        setCurrentPage(1);
       } catch (error) {
         console.error(error);
         setLoading(false);
@@ -68,32 +73,38 @@ export default function ListingsPage() {
     debouncedMaxPrice,
   ]);
 
+  // --- PAGINATION LOGIC ---
+  const indexOfLastCard = currentPage * cardsPerPage;
+  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+  const currentCards = listings.slice(indexOfFirstCard, indexOfLastCard);
+  const totalPages = Math.ceil(listings.length / cardsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
+
   if (listings.length === 0)
     return (
-      <div className="col-span-full py-20 flex flex-col items-center justify-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+      <div className="min-h-[400px] flex flex-col items-center justify-center bg-white rounded-[40px] border-2 border-dashed border-slate-100 m-6">
         <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-          <span className="text-4xl animate-pulse">🔍</span>
+          <span className="text-4xl">🔍</span>
         </div>
-
-        <h3 className=" font-black text-slate-900 mb-2">
+        <h3 className="font-black text-slate-900 mb-2">
           {t("no_listings_found")}
         </h3>
-
-        <p className="   text-slate-500 font-medium text-center max-w-sm px-6">
-          {t("filter_error")}
-        </p>
-
         <button
           onClick={() => window.location.reload()}
-          className="mt-8 text-blue-600 font-bold hover:underline flex items-center gap-2"
+          className="mt-8 text-blue-600 font-bold hover:underline font-ka"
         >
-          🔄{t("clear_filters")}
+          🔄 {t("clear_filters")}
         </button>
       </div>
     );
@@ -102,22 +113,19 @@ export default function ListingsPage() {
     <div className="min-h-screen bg-[#F8FAFC] p-6">
       <div className="w-full mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {listings.map((item) => (
+          {currentCards.map((item) => (
             <div
               onClick={() => navigate(`/listing/${item.id}`)}
               key={item.id}
               className="group bg-white rounded-[40px] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 overflow-hidden flex flex-col cursor-pointer"
             >
-              {/* სლაიდერის სექცია */}
               <div className="relative h-64 overflow-hidden">
                 <Slider
-                  dots={true}
-                  infinite={true}
+                  dots={false}
+                  infinite={item.image?.length > 1}
                   speed={500}
                   slidesToShow={1}
                   slidesToScroll={1}
-                  autoplay={true}
-                  autoplaySpeed={3000}
                   className="h-full w-full"
                 >
                   {Array.isArray(item.image) && item.image.length > 0 ? (
@@ -136,16 +144,13 @@ export default function ListingsPage() {
                     </div>
                   )}
                 </Slider>
-
-                {/* სტატუსის ბეიჯი ფოტოზე */}
                 <div className="absolute top-5 left-5 z-10">
-                  <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-slate-800 uppercase tracking-widest shadow-sm">
+                  <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-slate-800 uppercase tracking-widest">
                     {item.status || "აქტიური"}
                   </span>
                 </div>
               </div>
 
-              {/* ინფორმაციის სექცია */}
               <div className="p-8 flex flex-col flex-1">
                 <div className="mb-4">
                   <h2 className="text-xl font-black text-slate-900 mb-2 truncate group-hover:text-blue-600 transition-colors">
@@ -156,7 +161,6 @@ export default function ListingsPage() {
                   </p>
                 </div>
 
-                {/* მოკლე მონაცემები (Grid-ში უფრო ლამაზია) */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
@@ -176,11 +180,6 @@ export default function ListingsPage() {
                   </div>
                 </div>
 
-                <p className="text-slate-500 text-sm line-clamp-2 mb-6 leading-relaxed">
-                  {item.description}
-                </p>
-
-                {/* ფასი და თარიღი */}
                 <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
@@ -190,19 +189,46 @@ export default function ListingsPage() {
                       ${item.price?.toLocaleString()}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[9px] text-slate-300 font-bold uppercase mb-1">
-                      {t("date")}
-                    </p>
-                    <p className="text-[11px] font-bold text-slate-400">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-2 mt-12 mb-10">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-3 rounded-2xl bg-white border border-slate-100 text-slate-600 disabled:opacity-30 hover:bg-blue-50 transition-colors"
+            >
+              ←
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+              <button
+                key={num}
+                onClick={() => handlePageChange(num)}
+                className={`w-12 h-12 rounded-2xl font-black transition-all duration-300 ${
+                  currentPage === num
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110"
+                    : "bg-white text-slate-400 border border-slate-100 hover:border-blue-200"
+                }`}
+              >
+                {num}
+              </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-3 rounded-2xl bg-white border border-slate-100 text-slate-600 disabled:opacity-30 hover:bg-blue-50 transition-colors"
+            >
+              →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

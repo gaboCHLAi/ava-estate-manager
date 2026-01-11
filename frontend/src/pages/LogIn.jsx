@@ -15,7 +15,7 @@ export default function LogIn() {
   const [password, setPassword] = useState("");
   const [submiting, setSubmiting] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  const [wrongPassword, setWrongPassword] = useState("");
+  const [serverError, setServerError] = useState("");
   const { login } = useStatus();
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) =>
@@ -26,15 +26,14 @@ export default function LogIn() {
   const formValidation = () => {
     const errors = {};
 
-    if (!email) errors.email = t("email_required");
-    else if (!validateEmail(email)) errors.email = t("invalid_email");
+    if (!email) {
+      errors.email = t("email_required");
+    } else if (!validateEmail(email)) {
+      errors.email = t("invalid_email");
+    }
 
     if (!password) {
       errors.password = t("password_required");
-    } else if (!validatePassword(password)) {
-      errors.password = t("min_password");
-    } else if (wrongPassword) {
-      errors.password = t("invalid_password");
     }
 
     setFormErrors(errors);
@@ -42,38 +41,54 @@ export default function LogIn() {
   };
 
   useEffect(() => {
-    if (formErrors.email && email) {
-      setFormErrors((prev) => ({ ...prev, email: "" }));
-    }
-  }, [email]);
+    const fieldValues = { email, password };
+    setFormErrors((prevErrors) => {
+      const newErrors = { ...prevErrors };
+      let hasChanged = false;
 
-  useEffect(() => {
-    if (formErrors.password && password) {
-      setFormErrors((prev) => ({ ...prev, password: "" }));
-    }
-  }, [password]);
+      Object.keys(fieldValues).forEach((key) => {
+        if (newErrors[key] && fieldValues[key]) {
+          delete newErrors[key];
+          hasChanged = true;
+        }
+      });
+
+      return hasChanged ? newErrors : prevErrors;
+    });
+  }, [email, password]);
 
   const handleLogIn = async (e) => {
     e.preventDefault();
-    const isValid = formValidation();
-    if (!isValid) return;
+
+    // 1. ჯერ ვამოწმებთ ფრონტის ვალიდაციას
+    if (!formValidation()) return;
 
     setSubmiting(true);
+    setServerError(""); // ვასუფთავებთ ზოგად ერორს
+
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
         { email, password }
       );
 
-      // აქასწორე
       login({
-        userName: response.data.user.first_name, // Backend-ის user.first_name
+        userName: response.data.user.first_name,
         token: response.data.token,
       });
 
       navigate(from, { replace: true });
     } catch (error) {
-      setWrongPassword(error.response?.data?.message || "❌ მოხდა შეცდომა");
+      const message = error.response?.data?.message;
+
+      // 2. ვამოწმებთ ბექენდიდან მოსულ კონკრეტულ შეცდომის Key-ს
+      if (message === "user_not_found") {
+        setFormErrors((prev) => ({ ...prev, email: t("user_not_found") }));
+      } else if (message === "invalid_password") {
+        setFormErrors((prev) => ({ ...prev, password: t("invalid_password") }));
+      } else {
+        setServerError(t("auth_failed"));
+      }
     } finally {
       setSubmiting(false);
     }
@@ -81,6 +96,11 @@ export default function LogIn() {
 
   return (
     <div className="min-h-screen flex justify-center items-center px-4 bg-blue-400">
+      {serverError && (
+        <div className="w-full p-3 mb-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center">
+          {serverError}
+        </div>
+      )}
       <form
         onSubmit={handleLogIn}
         className="flex flex-col items-center gap-6 bg-white rounded-2xl p-8 w-full max-w-md shadow-lg"
