@@ -4,13 +4,7 @@ import PhoneMenu from "./PhoneMenu";
 import Logo from "./Logo";
 import { Link, useNavigate } from "react-router-dom";
 import { useStatus } from "./contextAPI/Context";
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useLocation,
-  useContext,
-} from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function NavBar({ menuRef, activeDropdown }) {
   const { t, i18n } = useTranslation();

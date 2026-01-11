@@ -60,11 +60,10 @@ export default function LogIn() {
   const handleLogIn = async (e) => {
     e.preventDefault();
 
-    // 1. ჯერ ვამოწმებთ ფრონტის ვალიდაციას
     if (!formValidation()) return;
 
     setSubmiting(true);
-    setServerError(""); // ვასუფთავებთ ზოგად ერორს
+    setServerError("");
 
     try {
       const response = await axios.post(
@@ -96,11 +95,6 @@ export default function LogIn() {
 
   return (
     <div className="min-h-screen flex justify-center items-center px-4 bg-blue-400">
-      {serverError && (
-        <div className="w-full p-3 mb-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg text-center">
-          {serverError}
-        </div>
-      )}
       <form
         onSubmit={handleLogIn}
         className="flex flex-col items-center gap-6 bg-white rounded-2xl p-8 w-full max-w-md shadow-lg"

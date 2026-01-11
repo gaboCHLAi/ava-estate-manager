@@ -12,14 +12,26 @@ export const StatusProvider = ({ children }) => {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [images, setImages] = useState([]);
-  const [user, setUser] = useState(null);
 
+  // 1. Initial State - პირდაპირ კითხულობს სწორი Key-თ ("user")
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user"); // შეცვლილია "user"-ზე
+    const storedToken = localStorage.getItem("token");
+
+    if (storedUser && storedToken) {
+      return { userName: storedUser, token: storedToken };
+    }
+    return null;
+  });
+
+  // 2. Login - აქ იყო მთავარი ბაგი! userName-ის ნაცვლად დავარქვი "user"
   const login = ({ userName, token }) => {
-    localStorage.setItem("userName", userName); // შენს key-ში უნდა იყოს userName
+    localStorage.setItem("user", userName); // Key უნდა ემთხვეოდეს წაკითხვას!
     localStorage.setItem("token", token);
     setUser({ userName, token });
   };
 
+  // 3. useEffect - ყოველი შემთხვევისთვის, რომ სინქრონიზაცია არ დაიკარგოს
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
@@ -27,6 +39,7 @@ export const StatusProvider = ({ children }) => {
       setUser({ userName: storedUser, token: storedToken });
     }
   }, []);
+
   const logout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
