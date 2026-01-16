@@ -2,20 +2,22 @@ import pg from "pg";
 const { Pool } = pg;
 import dotenv from "dotenv";
 
-dotenv.config(); // აუცილებელია, რომ db.js-მაც დაინახოს .env
+dotenv.config();
+
+// პრიორიტეტს ვანიჭებთ DATABASE_URL-ს, რომელიც Render-ზე გვაქვს
+const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  connectionString: connectionString,
   ssl: {
+    // ეს აუცილებელია Render-ისთვის, რომ კავშირი არ გაწყდეს
     rejectUnauthorized: false,
   },
 });
-pool.on("error", (err, client) => {
+
+pool.on("error", (err) => {
   console.error("Unexpected error on idle client", err);
-  process.exit(-1); // სერვერი გადაიტვირთება და თავიდან დაუკავშირდება
+  process.exit(-1);
 });
+
 export default pool;
