@@ -4,26 +4,26 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// ვამოწმებთ, საერთოდ არსებობს თუ არა ცვლადი
+// ვიღებთ მისამართს
 const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  console.error(
-    "❌ ERROR: DATABASE_URL is NOT DEFINED! Check Render Environment Variables."
-  );
-} else {
-  // უსაფრთხოდ გამოგვაქვს ნაწილი, რომ დავინახოთ, კითხულობს თუ არა
-  console.log(
-    "✅ Database URL found, starts with:",
-    connectionString.substring(0, 20)
-  );
-}
 
 const pool = new Pool({
   connectionString: connectionString,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  // SSL-ს ვრთავთ მხოლოდ მაშინ, როცა DATABASE_URL არსებობს და არის Supabase-ის
+  ssl:
+    (connectionString && connectionString.includes("supabase.com")) ||
+    connectionString.includes("pooler.supabase.com")
+      ? { rejectUnauthorized: false }
+      : false,
+});
+
+// კავშირის შემოწმების ლოგი
+pool.connect((err, client, release) => {
+  if (err) {
+    return console.error("❌ კავშირის შეცდომა:", err.message);
+  }
+  console.log("🚀 მონაცემთა ბაზა წარმატებით დაუკავშირდა!");
+  release();
 });
 
 export default pool;
