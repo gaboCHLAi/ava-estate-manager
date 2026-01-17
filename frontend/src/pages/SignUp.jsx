@@ -5,7 +5,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
-
+import { Eye, EyeOff } from "lucide-react";
 export default function SignUp() {
   const { t } = useTranslation();
   const [name, setName] = useState("");
@@ -17,6 +17,7 @@ export default function SignUp() {
   const [formErrors, setFormError] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSucceed, setIsSucceed] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   // დავამატოთ useRef თუ ის გჭირდება, წინააღმდეგ შემთხვევაში წაშალე handleRegister-დან
   const validRef = useRef(false);
@@ -24,7 +25,7 @@ export default function SignUp() {
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) =>
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(
-      password
+      password,
     );
 
   const formValidation = () => {
@@ -75,7 +76,7 @@ export default function SignUp() {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/auth/register`,
-        { name, lastName, email, password }
+        { name, lastName, email, password },
       );
       if (validRef.current) validRef.current = false;
       setIsSucceed(true);
@@ -85,7 +86,7 @@ export default function SignUp() {
     } catch (error) {
       console.error("Registration error:", error);
       setServerError(
-        error.response?.data?.message || "❌ რეგისტრაცია ვერ მოხერხდა"
+        error.response?.data?.message || "❌ რეგისტრაცია ვერ მოხერხდა",
       );
     } finally {
       setSubmiting(false);
@@ -160,22 +161,40 @@ export default function SignUp() {
             <span className="text-red-500 text-sm">{formErrors.email}</span>
           )}
 
-          <input
-            placeholder={t("password_placeholder")}
-            type="password"
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none"
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="relative w-full max-w-sm">
+            <input
+              placeholder={t("password_placeholder")}
+              type={showPassword ? "text" : "password"}
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           {formErrors.password && (
             <span className="text-red-500 text-sm">{formErrors.password}</span>
           )}
 
-          <input
-            placeholder={t("repeat_password_placeholder")}
-            type="password"
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none"
-            onChange={(e) => setRepeatPassword(e.target.value)}
-          />
+          <div className="relative w-full max-w-sm">
+            <input
+              placeholder={t("repeat_password_placeholder")}
+              type={showPassword ? "text" : "password"}
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none"
+              onChange={(e) => setRepeatPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           {formErrors.repeatPassword && (
             <span className="text-red-500 text-sm">
               {formErrors.repeatPassword}
