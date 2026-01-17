@@ -23,14 +23,14 @@ export default function Profile() {
           `${import.meta.env.VITE_BACKEND_URL}/listings/getProfile`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         // ვვარაუდობთ, რომ ბექენდიდან მოდის: response.data.user = { name, lastName, email, phone, _id }
         setUser(response.data.user);
         setLoading(false);
       } catch (err) {
         setError(
-          err.response?.data?.message || "მონაცემების წამოღება ვერ მოხერხდა"
+          err.response?.data?.message || "მონაცემების წამოღება ვერ მოხერხდა",
         );
         setLoading(false);
       }

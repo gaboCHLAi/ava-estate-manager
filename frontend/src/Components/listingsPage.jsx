@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useStatus } from "./contextAPI/Context";
+import { useStatus } from "../Components/contextAPI/Context";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import { useTranslation } from "react-i18next";
