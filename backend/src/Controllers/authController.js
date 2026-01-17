@@ -99,18 +99,30 @@ export const EmailVerification = async (req, res) => {
     // შემოწმება ტერმინალში
     const checkDB = await pool.query(
       "SELECT reset_code FROM users WHERE email = $1",
-      [email]
+      [email],
     );
     console.log("ბაზაში ახლა ჩაწერილი კოდია:", checkDB.rows[0].reset_code);
 
     // 4. მეილის გაგზავნის კონფიგურაცია
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    const transporter = nodemailer.createTransport(
+      process.env.NODE_ENV === "production"
+        ? {
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+            },
+          }
+        : {
+            service: "gmail",
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+            },
+          },
+    );
 
     // 5. თავად გაგზავნა
     await transporter.sendMail({
@@ -154,7 +166,7 @@ export const VerifyCode = async (req, res) => {
     console.log(
       "ბაზიდან მოსული:",
       user.reset_code.length,
-      typeof user.reset_code
+      typeof user.reset_code,
     );
     console.log("შენს მიერ შეყვანილი:", code.length, typeof code);
     console.log("ბაზიდან მოსული:", user.reset_code, typeof user.reset_code);

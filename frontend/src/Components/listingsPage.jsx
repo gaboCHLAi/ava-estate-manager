@@ -51,7 +51,7 @@ export default function ListingsPage() {
             minPrice: debouncedMinPrice,
             maxPrice: debouncedMaxPrice,
           },
-          { params: { lang: i18n.language } }
+          { params: { lang: i18n.language } },
         );
         setListings(response.data);
         setLoading(false);
@@ -136,6 +136,7 @@ export default function ListingsPage() {
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
+                        {console.log(`${img}`)}
                       </div>
                     ))
                   ) : (
