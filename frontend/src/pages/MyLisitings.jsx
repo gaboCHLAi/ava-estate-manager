@@ -23,7 +23,7 @@ const MyListings = () => {
           `${import.meta.env.VITE_BACKEND_URL}/listings/getMyListings`,
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
         console.log("aqaaa", response.data);
         setUser(response.data.user);
@@ -124,14 +124,11 @@ const MyListings = () => {
                 <div
                   key={item.id}
                   className="hover:cursor-pointer group bg-white rounded-[40px] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 overflow-hidden flex flex-col"
-                  onClick={() => navigate(`/manageListing/${item.id}`)}
                 >
                   {/* Image Section */}
                   <div className="relative h-64 overflow-hidden">
                     <Swiper
                       modules={[Navigation, Pagination, Autoplay]}
-                      navigation
-                      pagination={{ clickable: true }}
                       autoplay={{ delay: 5000 }}
                       className="h-full w-full"
                     >
@@ -162,7 +159,10 @@ const MyListings = () => {
                   </div>
 
                   {/* Content Section */}
-                  <div className="p-8 flex flex-col flex-1">
+                  <div
+                    className="p-8 flex flex-col flex-1"
+                    onClick={() => navigate(`/manageListing/${item.id}`)}
+                  >
                     <h3 className="text-xl font-black text-slate-900 mb-2 truncate group-hover:text-blue-600 transition-colors">
                       {item.title}
                     </h3>

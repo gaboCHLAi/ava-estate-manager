@@ -7,6 +7,7 @@ import {
   HiLogout,
   HiPlusCircle,
   HiLogin,
+  HiHome,
 } from "react-icons/hi";
 
 export default function PhoneMenu({ isOpen, onClose, user, handleLogout }) {
@@ -60,6 +61,16 @@ export default function PhoneMenu({ isOpen, onClose, user, handleLogout }) {
           {!user ? (
             <div>
               <Link
+                to="/"
+                onClick={onClose}
+                className="flex items-center gap-4 p-4 text-gray-700 hover:bg-gray-100 rounded-2xl transition-all active:scale-95"
+              >
+                <div className="bg-blue-50 p-2 rounded-lg">
+                  <HiHome className="text-xl text-blue-600" />
+                </div>
+                <span className="font-semibold">{t("home")}</span>
+              </Link>
+              <Link
                 to="/login"
                 onClick={onClose}
                 className="flex items-center gap-4 p-4 text-gray-700 hover:bg-gray-100 rounded-2xl transition-all active:scale-95"
@@ -85,6 +96,16 @@ export default function PhoneMenu({ isOpen, onClose, user, handleLogout }) {
           ) : (
             /* თუ მომხმარებელი შესულია - ჩანს სრული მენიუ */
             <>
+              <Link
+                to="/"
+                onClick={onClose}
+                className="flex items-center gap-4 p-4 text-gray-700 hover:bg-gray-100 rounded-2xl transition-all active:scale-95"
+              >
+                <div className="bg-blue-50 p-2 rounded-lg">
+                  <HiHome className="text-xl text-blue-600" />
+                </div>
+                <span className="font-semibold">{t("home")}</span>
+              </Link>
               <Link
                 to="/add-listing"
                 onClick={onClose}
