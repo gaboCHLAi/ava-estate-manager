@@ -105,12 +105,10 @@ export const EmailVerification = async (req, res) => {
 
     // 4. მეილის გაგზავნის კონფიგურაცია
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST, // smtp.gmail.com
-      port: Number(process.env.EMAIL_PORT), // 465
-      secure: process.env.EMAIL_SECURE === "true", // true
+      service: "gmail", // ეს ბევრად უფრო სტაბილურია Cloud-ზე
       auth: {
-        user: process.env.EMAIL_USER, // chlaidzegabriel@gmail.com
-        pass: process.env.EMAIL_PASS, // App Password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
