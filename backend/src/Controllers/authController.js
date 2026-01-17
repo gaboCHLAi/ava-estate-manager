@@ -104,25 +104,18 @@ export const EmailVerification = async (req, res) => {
     console.log("ბაზაში ახლა ჩაწერილი კოდია:", checkDB.rows[0].reset_code);
 
     // 4. მეილის გაგზავნის კონფიგურაცია
-    const transporter = nodemailer.createTransport(
-      process.env.NODE_ENV === "production"
-        ? {
-            host: "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASS,
-            },
-          }
-        : {
-            service: "gmail",
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASS,
-            },
-          },
-    );
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // 465 პორტისთვის აუცილებელია true
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false, // ეს დაამატე ყოველი შემთხვევისთვის, რომ Render-მა კავშირი არ გაწყვიტოს
+      },
+    });
 
     // 5. თავად გაგზავნა
     await transporter.sendMail({
