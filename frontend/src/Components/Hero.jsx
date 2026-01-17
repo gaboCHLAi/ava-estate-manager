@@ -50,7 +50,7 @@ const Hero = () => {
               countrycodes: "ge",
               "accept-language": i18n.language === "ka" ? "ka" : "en",
             },
-          }
+          },
         );
         console.log("movidaa", selectedCity);
 
@@ -71,7 +71,7 @@ const Hero = () => {
         const [propertyRes, dealRes] = await Promise.all([
           axios.get(
             `${import.meta.env.VITE_BACKEND_URL}/property-type`,
-            config
+            config,
           ),
           axios.get(`${import.meta.env.VITE_BACKEND_URL}/deal_type`, config),
         ]);
@@ -175,7 +175,7 @@ const Hero = () => {
                     <div
                       key={d.id}
                       onClick={() => {
-                        setDealTypeId(d.id);
+                        setActiveDealType([d.id]);
                         setActiveDropdown(0);
                       }}
                       className={`px-4 py-2 hover:bg-blue-50 cursor-pointer ${
@@ -250,7 +250,7 @@ const Hero = () => {
                     setActiveDealType((prev) =>
                       prev.includes(d.id)
                         ? prev.filter((id) => id !== d.id)
-                        : [...prev, d.id]
+                        : [...prev, d.id],
                     )
                   }
                   className={`px-4 py-2 rounded-lg font-medium transition ${
@@ -271,7 +271,7 @@ const Hero = () => {
                     setActiveProperty((prev) =>
                       prev.includes(property.id)
                         ? prev.filter((id) => id !== property.id)
-                        : [...prev, property.id]
+                        : [...prev, property.id],
                     )
                   }
                   className={`px-4 py-2 rounded-lg font-medium transition ${

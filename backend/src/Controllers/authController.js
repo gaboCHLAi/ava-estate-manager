@@ -105,10 +105,16 @@ export const EmailVerification = async (req, res) => {
 
     // 4. მეილის გაგზავნის კონფიგურაცია
     const transporter = nodemailer.createTransport({
-      service: "gmail", // ეს ბევრად უფრო სტაბილურია Cloud-ზე
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // აუცილებელია false 587-ისთვის
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false, // გვერდს უვლის სერტიფიკატის ბლოკირებას
+        minVersion: "TLSv1.2",
       },
     });
 
