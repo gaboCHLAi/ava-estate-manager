@@ -43,6 +43,11 @@ export default function NavBar({ menuRef, activeDropdown }) {
           {/* მარცხენა მხარე: ლოგო */}
           <Link
             to="/"
+            onClick={() => {
+              if (window.location.pathname === "/") {
+                window.location.reload(); // თუ უკვე მთავარზე ხარ, უბრალოდ დაარეფრეშებს
+              }
+            }}
             className="hover:scale-105 transition-transform duration-150 shrink-0"
           >
             <Logo className="w-32 text-blue-500" />
