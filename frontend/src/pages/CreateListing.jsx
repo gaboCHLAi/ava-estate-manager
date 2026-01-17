@@ -41,6 +41,15 @@ export default function CreateListing() {
   const { images, setImages } = useStatus();
   const navigate = useNavigate();
   const myRef = useRef(false);
+  const locationRef = useRef(null);
+  const priceRef = useRef(null);
+  const areaRef = useRef(null);
+  const roomsRef = useRef(null);
+  const floorRef = useRef(null);
+  const totalFloorRef = useRef(null);
+  const descriptionRef = useRef(null);
+  const imagesRef = useRef(null);
+  const contactRef = useRef(null);
   const validateForm = () => {
     let formErrors = {};
     console.log("ვალიდაციის მომენტში price არის:", price);
@@ -69,7 +78,7 @@ export default function CreateListing() {
     const fieldValues = {
       price,
       areaMQ,
-      room: selectedRoom.length > 0 ? selectedRoom : "", // რადგან მასივია
+      room: selectedRoom.length > 0 ? selectedRoom : "",
       floor,
       totalFloor,
       description,
@@ -140,7 +149,7 @@ export default function CreateListing() {
               countrycodes: "ge",
               "accept-language": i18n.language === "ka" ? "ka" : "en",
             },
-          }
+          },
         );
 
         console.log("dailogaaaaa", response.data);
@@ -169,7 +178,7 @@ export default function CreateListing() {
           axios.get(`${import.meta.env.VITE_BACKEND_URL}/deal_type`, config),
           axios.get(
             `${import.meta.env.VITE_BACKEND_URL}/property-type`,
-            config
+            config,
           ),
           axios.get(`${import.meta.env.VITE_BACKEND_URL}/cities`),
           axios.get(`${import.meta.env.VITE_BACKEND_URL}/status`, config),
@@ -205,12 +214,11 @@ export default function CreateListing() {
 
     setVerificationLoading(true);
     try {
-      // აქ იძახებ შენს ახალ ენდპოინტს
       const respons = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/listings/send-otp`,
         {
           phone: phone,
-        }
+        },
       );
 
       const receivedCode = respons.data.otpCode;
@@ -230,10 +238,56 @@ export default function CreateListing() {
     e.preventDefault();
     setSubmiting(true);
 
+    // 1. ვალიდაცია და სქროლი
     if (!validateForm()) {
       setSubmiting(false);
-      return;
+
+      if (errors.city) {
+        locationRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.price) {
+        priceRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.areaMQ) {
+        areaRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.room) {
+        roomsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.floor || errors.totalFloor) {
+        floorRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.description) {
+        descriptionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.images) {
+        imagesRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      } else if (errors.name || errors.phone) {
+        contactRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+
+      return; // აქ წყდება ფუნქცია, თუ ვალიდაცია ვერ გაიარა
     }
+
+    // 2. მონაცემების მომზადება (ეს ხაზები უკვე სწორად ფუნქციის შიგნითაა)
     const formData = new FormData();
     formData.append("property_type_id", Number(propertyTypeId));
     formData.append("deal_type_id", Number(dealTypeId));
@@ -242,7 +296,7 @@ export default function CreateListing() {
     formData.append("city_id", selectedCity?.place_id || "");
     formData.append(
       "location",
-      selectedCity?.address?.city || selectedCity?.address?.neighbourhood || ""
+      selectedCity?.address?.city || selectedCity?.address?.neighbourhood || "",
     );
     formData.append("price", Number(price));
     formData.append("price_per_m2", Number(PPQ));
@@ -257,7 +311,7 @@ export default function CreateListing() {
     formData.append("contact_code", code);
     formData.append(
       "neighbourhood",
-      selectedCity?.address?.neighbourhood || ""
+      selectedCity?.address?.neighbourhood || "",
     );
     formData.append("city_name", selectedCity?.address?.city || "");
 
@@ -265,9 +319,9 @@ export default function CreateListing() {
       formData.append("images", image);
     });
 
+    // 3. გაგზავნა
     try {
       const token = localStorage.getItem("token");
-
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/listings`,
         formData,
@@ -276,7 +330,7 @@ export default function CreateListing() {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 201 || response.status === 200) {
@@ -289,22 +343,16 @@ export default function CreateListing() {
       }
     } catch (error) {
       setSubmiting(false);
-
-      // თუ სერვერმა დააბრუნა შეცდომა
       if (error.response) {
         const serverError = error.response.data;
-
         if (error.response.status === 500) {
           alert("სერვერული შეცდომა! სცადეთ მოგვიანებით.");
         } else {
           alert(
-            `შეცდომა: ${serverError?.message || "უცნობია"}. ${
-              serverError?.detail || ""
-            }`
+            `შეცდომა: ${serverError?.message || "უცნობია"}. ${serverError?.detail || ""}`,
           );
         }
       } else {
-        // თუ საერთოდ ინტერნეტის ან JS-ის ბრალია
         console.error("Client Error:", error.message);
         alert("მოთხოვნა ვერ გაიგზავნა. შეამოწმეთ ინტერნეტი.");
       }
@@ -533,7 +581,7 @@ export default function CreateListing() {
               </div>
             </div>
           </div>
-          <div>
+          <div ref={locationRef}>
             <label className="block text-gray-700 font-semibold mb-2">
               {t("location")}
             </label>
@@ -569,7 +617,7 @@ export default function CreateListing() {
           </div>
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-1 gap-0.5">
-              <div className="flex-1 min-w-[49%]">
+              <div className="flex-1 min-w-[49%]" ref={priceRef}>
                 <label className="block text-gray-700 font-semibold mb-2">
                   {t("price")} ($)
                 </label>
@@ -607,7 +655,7 @@ export default function CreateListing() {
                 />
               </div>
             </div>
-            <div className="flex-1">
+            <div className="flex-1" ref={areaRef}>
               <label className="block text-gray-700 font-semibold mb-2">
                 {t("area_m2")}
               </label>
@@ -623,7 +671,7 @@ export default function CreateListing() {
               )}
             </div>
           </div>
-          <div>
+          <div ref={roomsRef}>
             <label className=" block text-gray-700 font-semibold mb-2">
               {t("rooms")}
             </label>
@@ -636,7 +684,7 @@ export default function CreateListing() {
                   setSelectedRoom((prev) =>
                     prev.includes(R.id)
                       ? prev.filter((id) => id !== R.id)
-                      : [R.id]
+                      : [R.id],
                   )
                 }
                 className={`mx-1 px-4 py-3 rounded-xl border shadow-sm outline-none
@@ -680,7 +728,7 @@ export default function CreateListing() {
               })}
             </div>
           )}
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4" ref={floorRef}>
             <div className="flex-1">
               <label className="block text-gray-700 font-semibold mb-2">
                 {t("floor")}
@@ -696,7 +744,7 @@ export default function CreateListing() {
                 <span className="text-red-500 text-sm  ">{errors.floor}</span>
               )}
             </div>
-            <div className="flex-1">
+            <div className="flex-1" ref={totalFloorRef}>
               <label className="block text-gray-700 font-semibold mb-2">
                 {t("total_floors")}
               </label>
@@ -715,7 +763,10 @@ export default function CreateListing() {
             </div>
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label
+              className="block text-gray-700 font-semibold mb-2"
+              ref={descriptionRef}
+            >
               {t("description")}
             </label>
             <textarea
@@ -737,6 +788,7 @@ export default function CreateListing() {
             </label>
 
             <div
+              ref={imagesRef}
               className={`relative border-2 border-dashed rounded-[2rem] p-8 transition-all duration-300 group
     ${
       images.length > 0
@@ -808,7 +860,7 @@ export default function CreateListing() {
               </div>
             )}
           </div>
-          <div>
+          <div ref={contactRef}>
             <label className="block text-gray-700 font-semibold mb-2">
               {t("contact_information")}
             </label>
@@ -851,7 +903,9 @@ export default function CreateListing() {
                   onChange={(e) => setCode(e.target.value)}
                   value={code}
                 />
-
+                {errors.code && (
+                  <span className="text-red-500 text-sm  ">{errors.code}</span>
+                )}
                 {!isCodeSent ? (
                   <button
                     type="button"

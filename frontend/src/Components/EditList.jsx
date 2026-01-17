@@ -73,7 +73,7 @@ export default function EditList() {
             axios.get(`${import.meta.env.VITE_BACKEND_URL}/deal_type`, config),
             axios.get(
               `${import.meta.env.VITE_BACKEND_URL}/property-type`,
-              config
+              config,
             ),
             axios.get(`${import.meta.env.VITE_BACKEND_URL}/cities`),
             axios.get(`${import.meta.env.VITE_BACKEND_URL}/status`, config),
@@ -84,7 +84,7 @@ export default function EditList() {
               }/listings/getUserListingById/${id}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
-              }
+              },
             ),
           ]);
         setDealType(dealRes.data);
@@ -128,6 +128,8 @@ export default function EditList() {
         setName(data.contact_name);
         setPhone(data.contact_phone);
         setSearchTerm(data.location);
+        console.log(data.location);
+
         setSelectedCity(data.city);
         console.log(data.city);
 
@@ -169,7 +171,7 @@ export default function EditList() {
               countrycodes: "ge",
               "accept-language": i18n.language === "ka" ? "ka" : "en",
             },
-          }
+          },
         );
         setResults(response.data);
       } catch (error) {
@@ -199,7 +201,7 @@ export default function EditList() {
     try {
       const resp = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/listings/send-otp`,
-        { phone }
+        { phone },
       );
       setIsCodeSent(true);
       setCode(String(resp.data.otpCode));
@@ -247,12 +249,7 @@ export default function EditList() {
     formData.append("status_id", statusId);
     formData.append("condition_id", conditionId);
     formData.append("city_id", selectedCity?.place_id || "");
-    formData.append(
-      "location",
-      selectedCity
-        ? selectedCity?.address?.city || selectedCity?.address?.neighbourhood
-        : ""
-    );
+    formData.append("location", searchTerm);
     formData.append("price", price);
     formData.append("area_m2", areaMQ);
     formData.append("rooms", selectedRoom[0] || room);
@@ -263,7 +260,7 @@ export default function EditList() {
     formData.append("contact_phone", phone);
     formData.append(
       "neighbourhood",
-      selectedCity?.address?.neighbourhood || ""
+      selectedCity?.address?.neighbourhood || "",
     );
     formData.append("city_name", selectedCity?.address?.city || "");
     images.forEach((img) => formData.append("images", img));
@@ -277,7 +274,7 @@ export default function EditList() {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
       setIsSucceed(true);
       setTimeout(() => {

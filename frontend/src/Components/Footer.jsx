@@ -85,13 +85,13 @@ export default function Footer() {
               href="tel:0322800015"
               className="hover:text-slate-900 transition-colors"
             >
-              📞 032 2 80 00 15
+              📞 032 2 32 15 15
             </a>
             <a
               href="mailto:info@myhome.ge"
               className="hover:text-slate-900 transition-colors"
             >
-              ✉️ info@myhome.ge
+              ✉️ info@realestate.ge
             </a>
             <span className="cursor-pointer hover:text-slate-900 transition-colors uppercase tracking-tighter">
               ანონიმური უკუკავშირი
@@ -99,7 +99,8 @@ export default function Footer() {
           </div>
 
           <p className="text-slate-300 text-[12px] font-medium">
-            © {new Date().getFullYear()} MyHome Clone. ყველა უფლება დაცულია.
+            © {new Date().getFullYear()} Real Estate Clone. ყველა უფლება
+            დაცულია.
           </p>
         </div>
       </div>

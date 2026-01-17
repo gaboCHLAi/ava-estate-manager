@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getGeorgianDate } from "../utils/formatDate";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
@@ -21,7 +21,7 @@ const ListingDetail = () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/listings/getList/${id}`,
-          { params: { lang: i18n.language } }
+          { params: { lang: i18n.language } },
         );
         setItem(response.data);
         setLoading(false);
@@ -50,12 +50,6 @@ const ListingDetail = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20">
       <div className="max-w-7xl mx-auto px-4 pt-8">
-        {/* Header Section (იგივე რჩება) */}
-        <nav className="flex mb-4 text-sm text-gray-400 gap-2 font-medium">
-          <span>{t("home")}</span> / <span>{t("listings")}</span> /{" "}
-          <span className="text-blue-600">{t("details")}</span>
-        </nav>
-
         {/* Hero Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
