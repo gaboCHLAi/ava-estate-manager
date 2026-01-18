@@ -31,7 +31,7 @@ const ManageListing = () => {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-          }
+          },
         );
 
         setItem(response.data);
@@ -52,7 +52,7 @@ const ManageListing = () => {
         `${import.meta.env.VITE_BACKEND_URL}/listings/delete/${id}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        },
       );
       // წაშლის შემდეგ გადავიყვანოთ მომხმარებელი
       navigate("/myCards");
@@ -205,9 +205,7 @@ const ManageListing = () => {
             <div className="w-32 h-24 bg-gray-200 rounded-2xl overflow-hidden shadow-inner">
               {item.image && item.image[0] ? (
                 <img
-                  src={`${import.meta.env.VITE_BACKEND_IMG_URL}${
-                    item.image[0]
-                  }`}
+                  src={item.image}
                   className="w-full h-full object-cover"
                   alt="Property"
                 />

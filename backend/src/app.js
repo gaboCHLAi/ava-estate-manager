@@ -9,22 +9,17 @@ const app = express();
 
 /* ---------------- MIDDLEWARES ---------------- */
 
-// Logger
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-// Body parser
 app.use(express.json());
-
-// Static files
-app.use("/uploads", express.static("uploads"));
 
 // CORS
 const corsOptions =
   process.env.NODE_ENV === "production"
     ? {
-        origin: process.env.CORS, // live frontend URL
+        origin: process.env.CORS,
         credentials: true,
       }
     : {
@@ -35,30 +30,23 @@ const corsOptions =
 app.use(cors(corsOptions));
 
 /* ---------------- ROUTES ---------------- */
-
 app.use("/api", lookuproutes);
 app.use("/api/listings", listingsroutes);
 app.use("/api/auth", authRoutes);
 
-/* ---------------- GLOBAL ERROR HANDLER ---------------- */
-
+/* ---------------- ERROR HANDLER ---------------- */
 app.use((err, req, res, next) => {
   console.error(err);
-
-  if (process.env.NODE_ENV === "production") {
-    res.status(500).json({ message: "Internal server error" });
-  } else {
-    res.status(500).json({
-      message: err.message,
-      stack: err.stack,
-    });
-  }
+  res.status(500).json({
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Internal server error"
+        : err.message,
+  });
 });
 
 /* ---------------- SERVER ---------------- */
-
 const PORT = process.env.PORT || 10000;
-
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });

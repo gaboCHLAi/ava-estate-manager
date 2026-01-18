@@ -1,5 +1,8 @@
 import pool from "../db.js";
 import translate from "@vitalets/google-translate-api";
+import crypto from "crypto";
+import { supabase } from "../supabaseClient.js";
+import multer from "multer";
 export const sendOTP = async (req, res) => {
   const { phone } = req.body;
 
@@ -17,7 +20,7 @@ export const sendOTP = async (req, res) => {
     // 3. ვინახავთ ბაზაში
     await pool.query(
       "INSERT INTO otp_verifications (phone, code, expires_at) VALUES ($1, $2, $3)",
-      [phone, otpCode, expiresAt]
+      [phone, otpCode, expiresAt],
     );
 
     // 4. აქ უნდა იყოს SMS პროვაიდერის კოდი (მაგ: sms.ge API)
@@ -30,6 +33,7 @@ export const sendOTP = async (req, res) => {
     res.status(500).json({ message: "კოდის გაგზავნისას მოხდა შეცდომა" });
   }
 };
+
 export const createListing = async (req, res) => {
   try {
     const userId = req.userId;
@@ -55,11 +59,12 @@ export const createListing = async (req, res) => {
       city_name,
     } = req.body;
 
+    /* ---------- OTP CHECK ---------- */
     const otpCheck = await pool.query(
-      `SELECT * FROM otp_verifications 
-       WHERE phone = $1 AND code = $2 AND expires_at > NOW() 
+      `SELECT 1 FROM otp_verifications 
+       WHERE phone = $1 AND code = $2 AND expires_at > NOW()
        ORDER BY created_at DESC LIMIT 1`,
-      [contact_phone, contact_code]
+      [contact_phone, contact_code],
     );
 
     if (otpCheck.rows.length === 0) {
@@ -68,54 +73,33 @@ export const createListing = async (req, res) => {
         .json({ message: "კოდი არასწორია ან ვადაგასულია!" });
     }
 
-    // ---------- CITY ----------
+    /* ---------- CITY ---------- */
     const cityCheck = await pool.query(
       "SELECT id FROM cities WHERE place_id = $1",
-      [city_id]
+      [city_id],
     );
 
     let finalCityId;
-
     if (cityCheck.rows.length === 0) {
       const cityInsert = await pool.query(
         `INSERT INTO cities (name, place_id, neighbourhood)
-         VALUES ($1, $2, $3)
-         RETURNING id`,
-        [city_name, city_id, neighbourhood]
+         VALUES ($1, $2, $3) RETURNING id`,
+        [city_name, city_id, neighbourhood],
       );
       finalCityId = cityInsert.rows[0].id;
     } else {
       finalCityId = cityCheck.rows[0].id;
     }
 
-    // ---------- IMAGES ----------
-
-    // ---------- LISTING ----------
+    /* ---------- LISTING ---------- */
     const listingResult = await pool.query(
       `INSERT INTO listings (
-        property_type_id,
-        deal_type_id,
-        status_id,
-        condition_id,
-        city_id,
-        location,
-        price,
-        price_per_m2,
-        area_m2,
-        rooms,
-        floor,
-        bedrooms,
-        total_floors,
-        description,
-        contact_name,
-        contact_phone,
-        contact_code,
-        user_id,
-        created_at
+        property_type_id, deal_type_id, status_id, condition_id, city_id,
+        location, price, price_per_m2, area_m2, rooms, floor, bedrooms, total_floors,
+        description, contact_name, contact_phone, contact_code, user_id, created_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW()
-      )
-      RETURNING *`,
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,NOW()
+      ) RETURNING *`,
       [
         property_type_id,
         deal_type_id,
@@ -127,183 +111,143 @@ export const createListing = async (req, res) => {
         price_per_m2,
         area_m2,
         rooms,
-        floor, // უნდა იყოს მე-11
-        bedrooms, // უნდა იყოს მე-12
+        floor,
+        bedrooms,
         totalFloors,
         description,
         contact_name,
         contact_phone,
         contact_code,
         userId,
-      ]
+      ],
     );
 
+    const listing = listingResult.rows[0];
+
+    /* ---------- IMAGES (SUPABASE) ---------- */
+    const imageUrls = [];
+
+    if (req.files?.length) {
+      for (const file of req.files) {
+        const ext = file.mimetype.split("/")[1];
+        const fileName = `${crypto.randomUUID()}.${ext}`;
+
+        // Upload file to Supabase
+        const { error: uploadError } = await supabase.storage
+
+          .from("listing-images")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+            upsert: false, // თუ იგივე სახელი არსებობს, არ ჩაანაცვლოს
+          });
+        for (const file of req.files) {
+          console.log("BUFFER CHECK:", file.buffer?.length);
+          console.log({
+            originalname: file.originalname,
+            size: file.size,
+            mimetype: file.mimetype,
+            hasBuffer: !!file.buffer,
+          });
+        }
+
+        if (uploadError) throw uploadError;
+
+        // Create public URL
+        const { data } = supabase.storage
+          .from("listing-images")
+          .getPublicUrl(fileName);
+
+        imageUrls.push(data.publicUrl);
+      }
+    }
+
+    /* ---------- SAVE IMAGE URLs TO DB ---------- */
+    if (imageUrls.length > 0) {
+      await pool.query(
+        `INSERT INTO listing_images (listing_id, image_url, position)
+         VALUES ($1, $2::text[], 1)`,
+        [listing.id, imageUrls],
+      );
+    }
+
+    // Delete OTP after successful listing
     await pool.query("DELETE FROM otp_verifications WHERE phone = $1", [
       contact_phone,
     ]);
 
-    const listing = listingResult.rows[0];
-
-    // ---------- IMAGES INSERTION ----------
-    const imageUrls = req.files
-      ? req.files.map((file) => `/uploads/${file.filename}`)
-      : [];
-
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
-
-      await client.query(
-        `INSERT INTO listing_images (listing_id, image_url, position)
-         VALUES ($1, $2::text[], $3)`, // დაამატე ::text[] რომ ბაზამ ტიპი იცნოს
-        [listing.id, imageUrls, 1]
-      );
-
-      await client.query("COMMIT");
-    } catch (error) {
-      await client.query("ROLLBACK");
-      console.error("Error inserting images: ", error);
-      throw error;
-    } finally {
-      client.release();
-    }
-
-    // ---------- RESPONSE ----------
-    res.status(201).json({
-      ...listing,
-    });
+    res.status(201).json({ listing, images: imageUrls });
   } catch (err) {
-    console.log("--- CRITICAL ERROR ---");
-    console.error(err);
-
-    // 2. პასუხში გააყოლე სრული ერორი, რომ ფრონტმა დაინახოს
-    return res.status(500).json({
-      message: err.message || "უცნობი შეცდომა",
-      detail: err.detail || "დეტალები არ არის",
-      stack: err.stack, // ეს დაგვეხმარება ხაზის პოვნაში
-    });
+    console.error("CREATE LISTING ERROR:", err);
+    res
+      .status(500)
+      .json({ message: err.message || "უცნობი შეცდომა", detail: err.detail });
   }
 };
 export const updateListing = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.userId;
-    const {
-      property_type_id,
-      deal_type_id,
-      status_id,
-      condition_id,
-      city_id, // Nominatim-ის place_id
-      city_name, // ქალაქის სახელი
-      neighbourhood, // უბანი
-      location, // სრული მისამართი
-      price,
-      price_per_m2,
-      area_m2,
-      rooms,
-      bedrooms,
-      floor,
-      totalFloors,
-      description,
-      contact_name,
-      contact_phone,
-    } = req.body;
 
-    // 1. ვამოწმებთ მფლობელობას
     const checkOwnership = await pool.query(
       "SELECT id FROM listings WHERE id = $1 AND user_id = $2",
-      [id, userId]
+      [id, userId],
     );
 
     if (checkOwnership.rows.length === 0) {
       return res.status(403).json({ message: "წვდომა უარყოფილია!" });
     }
 
-    // 2. CITY LOGIC (ზუსტად ისე, როგორც create-ში გაქვს)
-    let finalCityId;
-    const cityCheck = await pool.query(
-      "SELECT id FROM cities WHERE place_id = $1",
-      [city_id]
-    );
+    /* ---------- IMAGES ---------- */
+    const imageUrls = [];
 
-    if (cityCheck.rows.length === 0) {
-      const cityInsert = await pool.query(
-        `INSERT INTO cities (name, place_id, neighbourhood)
-         VALUES ($1, $2, $3)
-         RETURNING id`,
-        [city_name, city_id, neighbourhood]
-      );
-      finalCityId = cityInsert.rows[0].id;
-    } else {
-      finalCityId = cityCheck.rows[0].id;
+    if (req.files?.length) {
+      for (const file of req.files) {
+        const ext = file.mimetype.split("/")[1];
+        const fileName = `${crypto.randomUUID()}.${ext}`;
+
+        const { error } = await supabase.storage
+          .from("listing-images")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+          });
+
+        if (error) throw error;
+
+        const { data } = supabase.storage
+          .from("listing-images")
+          .getPublicUrl(fileName);
+
+        imageUrls.push(data.publicUrl);
+      }
     }
 
-    // 3. სურათების დამუშავება
-    let imageUrls = req.files
-      ? req.files.map((file) => `/uploads/${file.filename}`)
-      : [];
-
-    // 4. LISTING-ის განახლება
     const updateResult = await pool.query(
-      `UPDATE listings SET 
-        property_type_id = $1,
-        deal_type_id = $2,
-        status_id = $3,
-        condition_id = $4,
-        city_id = $5,      -- აი აქ დაჯდება გასწორებული ID
-        location = $6,
-        price = $7,
-        price_per_m2 = $8,
-        area_m2 = $9,
-        rooms = $10,
-        bedrooms = $11,
-        floor = $12,
-        total_floors = $13,
-        description = $14,
-        contact_name = $15,
-        contact_phone = $16,
+      `UPDATE listings SET
+        location = $1,
+        price = $2,
+        description = $3,
         updated_at = NOW()
-      WHERE id = $17 AND user_id = $18
-      RETURNING *`,
-      [
-        property_type_id,
-        deal_type_id,
-        status_id,
-        condition_id,
-        finalCityId, // ქალაქის ID
-        location,
-        price,
-        price_per_m2,
-        area_m2,
-        rooms,
-        bedrooms,
-        floor,
-        totalFloors,
-        description,
-        contact_name,
-        contact_phone,
-        id,
-        userId,
-      ]
+       WHERE id = $4 AND user_id = $5
+       RETURNING *`,
+      [req.body.location, req.body.price, req.body.description, id, userId],
     );
 
-    // 5. სურათების განახლება თეიბლში (თუ ახლებია)
     if (imageUrls.length > 0) {
-      const formattedImages = `{${imageUrls.join(",")}}`;
       await pool.query(
-        `UPDATE listing_images 
-         SET image_url = $1 
+        `UPDATE listing_images
+         SET image_url = $1::text[]
          WHERE listing_id = $2`,
-        [formattedImages, id]
+        [imageUrls, id],
       );
     }
 
-    res.status(200).json(updateResult.rows[0]);
+    res.json(updateResult.rows[0]);
   } catch (err) {
     console.error("UPDATE ERROR:", err);
     res.status(500).json({ message: "შეცდომა განახლებისას" });
   }
 };
+
 export const getListings = async (req, res) => {
   const {
     dealTypeId = [],
