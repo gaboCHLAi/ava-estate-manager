@@ -14,7 +14,8 @@ import PhoneMenu from "./Components/PhoneMenu";
 import NavBar from "./Components/NavBar";
 import ManageListing from "./pages/ManageListing";
 import EditList from "./Components/EditList";
-import Footer from "./Components/Footer"; // იმპორტი უკვე გაქვს
+import Footer from "./Components/Footer";
+import ScrollToTop from "./Components/ScrollToTop";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
 
           {/* მთავარი კონტენტი: flex-grow აიძულებს ამ დივს დაიკავოს მთელი თავისუფალი ადგილი */}
           <main className="flex-grow pt-[65px] md:pt-[124px]">
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -13,8 +13,7 @@ const MyListings = () => {
   const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const location = useLocation();
-  const cardRefs = useRef({});
+
   const { t } = useTranslation();
   useEffect(() => {
     const fetchMyListings = async () => {
@@ -38,19 +37,7 @@ const MyListings = () => {
 
     fetchMyListings();
   }, []);
-  useEffect(() => {
-    if (location.state?.scrollToId && listings.length > 0) {
-      const id = location.state.scrollToId;
 
-      // პატარა დაყოვნება, რომ DOM უკვე დახატული იყოს
-      setTimeout(() => {
-        cardRefs.current[id]?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 300);
-    }
-  }, [location.state, listings]);
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
@@ -136,7 +123,6 @@ const MyListings = () => {
               {listings.map((item) => (
                 <div
                   key={item.id}
-                  ref={(el) => (cardRefs.current[item.id] = el)}
                   className="hover:cursor-pointer group bg-white rounded-[40px] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 transition-all duration-500 overflow-hidden flex flex-col"
                 >
                   {/* Image Section */}
@@ -201,7 +187,7 @@ const MyListings = () => {
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+                    <div className="mt-auto gap-9 pt-6 border-t border-slate-50 flex items-center justify-between">
                       <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                           {t("price")}
@@ -210,6 +196,12 @@ const MyListings = () => {
                           ${item.price?.toLocaleString()}
                         </p>
                       </div>
+                      <button
+                        onClick={() => navigate(`/listing/${item.id}`)}
+                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2 rounded-2xl font-bold transition"
+                      >
+                        დეტალები
+                      </button>
                     </div>
                   </div>
                 </div>

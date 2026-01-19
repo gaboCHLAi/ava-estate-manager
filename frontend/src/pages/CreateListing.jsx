@@ -334,17 +334,13 @@ export default function CreateListing() {
       );
 
       if (response.status === 201 || response.status === 200) {
-        const newListingId = response.data.listing.id;
         setImages([]);
         setIsSucceed(true);
         setSubmiting(false);
         setTimeout(() => {
-          navigate("/myCards", {
-            state: { scrollToId: newListingId },
-          });
+          navigate("/myCards");
         }, 2000);
       }
-      console.log("NEW LISTING ID:", response.data);
     } catch (error) {
       setSubmiting(false);
       if (error.response) {
