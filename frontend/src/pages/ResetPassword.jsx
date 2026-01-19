@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useTranslation } from "react-i18next"; // დაემატა i18n
-
+import { Eye, EyeOff } from "lucide-react";
 export default function ResetPassword() {
   const { t } = useTranslation(); // ჰუკის ინიციალიზაცია
   const location = useLocation();
@@ -18,7 +18,7 @@ export default function ResetPassword() {
   const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false); // წარმატების მოდალისთვის
-
+  const [showPassword, setShowPassword] = useState(false);
   // თუ ემაილი არ გვაქვს, ვაბრუნებთ უკან
   if (!email) {
     window.location.href = "/forgotpassword";
@@ -40,7 +40,7 @@ export default function ResetPassword() {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/auth/resetPassword`,
-        { email, newPassword: password }
+        { email, newPassword: password },
       );
 
       if (response.status === 200) {
@@ -103,20 +103,38 @@ export default function ResetPassword() {
         </div>
 
         <div className="w-full flex flex-col gap-3">
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t("enter_new_password")}
-            type="password"
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <input
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder={t("repeat_new_password")}
-            type="password"
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+          <div className="relative w-full max-w-sm">
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("enter_new_password")}
+              type={showPassword ? "text" : "password"}
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          <div className="relative w-full max-w-sm">
+            <input
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder={t("repeat_new_password")}
+              type={showPassword ? "text" : "password"}
+              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           {formError && (
             <span className="text-red-500 text-sm font-medium self-start">
               {formError}

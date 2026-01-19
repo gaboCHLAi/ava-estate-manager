@@ -741,11 +741,7 @@ export default function EditList() {
                       className="group relative aspect-square rounded-2xl overflow-hidden shadow-md border-2 border-white"
                     >
                       <img
-                        src={
-                          img instanceof File
-                            ? URL.createObjectURL(img)
-                            : `${import.meta.env.VITE_BACKEND_IMG_URL}${img}`
-                        }
+                        src={img}
                         alt="preview"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
