@@ -43,6 +43,7 @@ export default function EditList() {
   const navigate = useNavigate();
   const { id } = useParams();
   const initialDataRef = useRef(null);
+  const cardRef = useRef(null);
 
   const validateForm = () => {
     let formErrors = {};
@@ -741,10 +742,15 @@ export default function EditList() {
                       className="group relative aspect-square rounded-2xl overflow-hidden shadow-md border-2 border-white"
                     >
                       <img
-                        src={img}
+                        src={
+                          typeof img === "string"
+                            ? img
+                            : URL.createObjectURL(img)
+                        }
                         alt="preview"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="w-full h-full object-cover"
                       />
+                      {console.log(img)}
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
