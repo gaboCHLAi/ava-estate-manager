@@ -175,15 +175,13 @@ const ManageListing = () => {
             მართვის ხელსაწყოები
           </label>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* რედაქტირების ღილაკი */}
-            <button
-              onClick={() => navigate(`/editList/${id}`)}
-              className="flex items-center justify-center gap-3 py-4 bg-white border-2 border-blue-500 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-sm"
-            >
-              <FaEdit /> {t("edit_listing")}
-            </button>
-          </div>
+          {/* რედაქტირების ღილაკი */}
+          <button
+            onClick={() => navigate(`/editList/${id}`)}
+            className="flex w-full items-center justify-center gap-3 py-4 bg-white border-2 border-blue-500 text-blue-600 font-bold rounded-2xl hover:bg-blue-50 transition-all shadow-sm"
+          >
+            <FaEdit /> {t("edit_listing")}
+          </button>
 
           <button
             onClick={() => setShowDeleteModal(true)}
@@ -199,7 +197,11 @@ const ManageListing = () => {
             <div className="w-32 h-24 bg-gray-200 rounded-2xl overflow-hidden shadow-inner">
               {item.image && item.image[0] ? (
                 <img
-                  src={item.image}
+                  src={
+                    typeof item.image[0] === "string"
+                      ? item.image[0]
+                      : URL.createObjectURL(item.image[0])
+                  }
                   className="w-full h-full object-cover"
                   alt="Property"
                 />
