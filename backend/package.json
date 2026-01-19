@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@supabase/supabase-js": "^2.90.1",
     "@vitalets/google-translate-api": "^9.2.1",
     "axios": "^1.13.2",
@@ -27,7 +28,8 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.12",
     "p-map": "^7.0.4",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "resend": "^6.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

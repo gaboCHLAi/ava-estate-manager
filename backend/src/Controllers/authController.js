@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { sendEmail } from "./email.js"; // import the helper
+
 export const Register = async (req, res) => {
   try {
     const { name, lastName, email, password } = req.body;
@@ -75,68 +77,38 @@ export const EmailVerification = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // 1. ვამოწმებთ არსებობს თუ არა იუზერი
     const emailQuery = `SELECT * FROM users WHERE email = $1`;
     const result = await pool.query(emailQuery, [email]);
 
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "მომხმარებელი მითითებული მეილით ვერ მოიძებნა" });
+      return res.status(404).json({ message: "მომხმარებელი ვერ მოიძებნა" });
     }
 
-    // 2. ვაგენერირებთ კოდს
     const verificationCode = crypto.randomInt(100000, 999999).toString();
 
-    // 3. ვანახლებთ ბაზას (ვადების გარეშე)
-    const updateQuery = `
-        UPDATE users 
-        SET reset_code = $1 
-        WHERE email = $2
-      `;
+    const updateQuery = `UPDATE users SET reset_code = $1 WHERE email = $2`;
     await pool.query(updateQuery, [verificationCode, email]);
 
-    // შემოწმება ტერმინალში
-    const checkDB = await pool.query(
-      "SELECT reset_code FROM users WHERE email = $1",
-      [email],
-    );
-    console.log("ბაზაში ახლა ჩაწერილი კოდია:", checkDB.rows[0].reset_code);
-
-    // 4. მეილის გაგზავნის კონფიგურაცია
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // აუცილებელია false 587-ისთვის
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false, // გვერდს უვლის სერტიფიკატის ბლოკირებას
-        minVersion: "TLSv1.2",
-      },
-    });
-
-    // 5. თავად გაგზავნა
-    await transporter.sendMail({
-      from: `"Your App" <${process.env.EMAIL_USER}>`,
+    // Use our new Brevo helper
+    await sendEmail({
       to: email,
-      subject: "Verification Code",
+      subject: "Email Verification Code",
       html: `
-        <h2>Email Verification</h2>
-        <p>შენი ვერიფიკაციის კოდია:</p>
-        <h1 style="color: #3b82f6;">${verificationCode}</h1>
-        <p>გამოიყენეთ ეს კოდი პაროლის აღსადგენად.</p>
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2>Email Verification</h2>
+          <p>Your verification code is:</p>
+          <h1 style="color: #3b82f6; letter-spacing: 5px;">${verificationCode}</h1>
+          <p>Use this code to reset your password.</p>
+        </div>
       `,
     });
 
-    return res.status(200).json({
-      message: "კოდი წარმატებით გაიგზავნა მეილზე",
-    });
+    return res
+      .status(200)
+      .json({ message: "კოდი წარმატებით გაიგზავნა მეილზე" });
   } catch (error) {
     console.error("Email Verification Error:", error);
-    return res.status(500).json({ message: "მეილის გაგზავნა ვერ მოხერხდა" });
+    return res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
 
