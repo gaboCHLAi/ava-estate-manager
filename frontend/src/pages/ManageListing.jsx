@@ -183,14 +183,8 @@ const ManageListing = () => {
             >
               <FaEdit /> {t("edit_listing")}
             </button>
-
-            {/* მეორე ღილაკი (შეგიძლია სხვა რამისთვის გამოიყენო, მაგ. "მთავარზე გამოჩენა") */}
-            <button className="flex items-center justify-center gap-3 py-4 font-bold rounded-2xl transition-all shadow-sm text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105">
-              <FaImages /> სურათების მართვა
-            </button>
           </div>
 
-          {/* წაშლის ღილაკი */}
           <button
             onClick={() => setShowDeleteModal(true)}
             className="w-full flex items-center justify-center gap-3 py-4 mt-4 border-2 border-dashed border-red-200 text-red-500 font-bold rounded-2xl hover:bg-red-50 transition-all group"
