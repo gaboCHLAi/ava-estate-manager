@@ -133,5 +133,7 @@
   "password_changed_congrats": "Congrats! Your password has been updated.",
   "code_required": "code_required",
   "no_changes_desc": "You haven't made any changes to the listing data.",
-  "invalid_number": "invalid number"
+  "invalid_number": "invalid number",
+  "is_waking_up": "Server is waking up...",
+  "may_take_a_minute": "This may take up to a minute on first load"
 }

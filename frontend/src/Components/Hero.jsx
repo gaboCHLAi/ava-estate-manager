@@ -87,8 +87,14 @@ const Hero = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC] gap-4">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+
+        <div className="text-gray-700 text-sm font-medium tracking-wide">
+          {t("is_waking_up")}
+        </div>
+
+        <div className="text-gray-400 text-xs">{t("may_take_a_minute")}</div>
       </div>
     );
 
