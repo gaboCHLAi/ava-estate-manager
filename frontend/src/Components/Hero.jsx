@@ -157,7 +157,7 @@ const Hero = () => {
               >
                 <span className="text-gray-700">
                   {dealType.find((d) => activeDealType.includes(d.id))?.name ||
-                    "გარიგების ტიპი"}
+                    t("deal_type")}
                 </span>
                 <svg
                   className={`w-4 h-4 transition-transform ${
@@ -205,7 +205,7 @@ const Hero = () => {
               >
                 <span className="text-gray-700">
                   {propertys.find((p) => activeProperty.includes(p.id))?.name ||
-                    "ქონების ტიპი"}
+                    t("property_type")}
                 </span>
                 <svg
                   className={`w-4 h-4 transition-transform ${

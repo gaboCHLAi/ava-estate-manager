@@ -161,7 +161,7 @@ export default function SignUp() {
             <span className="text-red-500 text-sm">{formErrors.email}</span>
           )}
 
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full">
             <input
               placeholder={t("password_placeholder")}
               type={showPassword ? "text" : "password"}
@@ -180,7 +180,7 @@ export default function SignUp() {
             <span className="text-red-500 text-sm">{formErrors.password}</span>
           )}
 
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full">
             <input
               placeholder={t("repeat_password_placeholder")}
               type={showPassword ? "text" : "password"}
